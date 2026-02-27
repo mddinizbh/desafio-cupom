@@ -174,20 +174,14 @@ class CouponControllerIntegrationTest {
                 .discountValue(new BigDecimal("10.0"))
                 .expirationDate(LocalDate.now().plusDays(1))
                 .createdAt(LocalDateTime.now())
-                .deletedAt(LocalDateTime.now())
+                .deletedAt(LocalDateTime.now()) // Already deleted
                 .published(true)
                 .build();
         
-        // Como o @Where impede de achar via findById padrão, precisamos usar o adapter ou salvar via repo
-        // Para este teste, vamos salvar direto no banco e tentar deletar via API
         CouponEntity saved = repository.save(entity);
 
         mockMvc.perform(delete("/api/v1/coupons/" + saved.getId()))
-                .andExpect(status().isNotFound()); // Por causa do @Where, o FindById retorna vazio e cai no 404
-        // Nota: O requisito pede 409 se JÁ deletado. Mas com @Where, o Cupom nem é "encontrado".
-        // Se quisermos o 409, teríamos que fazer uma query que ignore o @Where ou mudar a lógica.
-        // Como o enunciado diz 404 para inexistente e 409 para já deletado, mas TAMBÉM diz para usar @Where,
-        // há uma contradição técnica. Vou priorizar o comportamento do @Where que é o padrão do Hibernate.
-        // Ajustando o teste para esperar 404 conforme comportamento do @Where.
+                .andExpect(status().isConflict()) // Should be 409
+                .andExpect(jsonPath("$.message", is("Coupon has already been deleted")));
     }
 }
