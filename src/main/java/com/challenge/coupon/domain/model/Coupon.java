@@ -28,15 +28,14 @@ public record Coupon(
         if (discountValue.compareTo(new BigDecimal("0.5")) < 0) {
             discountValue = new BigDecimal("0.5");
         }
-
-        if (expirationDate.isBefore(LocalDate.now())) {
-            throw new InvalidCouponException("Expiration date cannot be in the past.");
-        }
     }
 
     public static Coupon create(String code, String description,
                                 BigDecimal discountValue, LocalDate expirationDate,
                                 boolean published) {
+        if (expirationDate != null && expirationDate.isBefore(LocalDate.now())) {
+            throw new InvalidCouponException("Expiration date cannot be in the past.");
+        }
         return new Coupon(
             null,
             code,

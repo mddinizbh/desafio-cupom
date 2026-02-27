@@ -46,7 +46,19 @@ O projeto segue a **Arquitetura Hexagonal (Ports & Adapters)**, com foco em imut
 - Maven
 - Docker (opcional)
 
-### Usando Maven
+### Usando Maven (Recomendado)
+```bash
+# No Windows
+.\mvnw clean install
+.\mvnw spring-boot:run
+
+# No Linux/macOS (dar permissão de execução primeiro se necessário)
+chmod +x mvnw
+./mvnw clean install
+./mvnw spring-boot:run
+```
+
+### Usando Maven (Global - se instalado)
 ```bash
 mvn clean install
 mvn spring-boot:run
@@ -83,7 +95,7 @@ A API estará disponível em `http://localhost:8080`.
 ## Testes
 Para executar os testes unitários e de integração:
 ```bash
-mvn test
+.\mvnw test
 ```
 A cobertura de testes foca em:
 - **Domínio:** Validações de criação e lógica de soft delete.

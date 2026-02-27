@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,10 +59,28 @@ class CouponTest {
     }
 
     @Test
-    @DisplayName("Should throw InvalidCouponException when expirationDate is in the past")
-    void shouldThrowExceptionWhenExpirationDateIsInPast() {
+    @DisplayName("Should throw InvalidCouponException when expirationDate is in the past on creation")
+    void shouldThrowExceptionWhenExpirationDateIsInPastOnCreation() {
         assertThrows(InvalidCouponException.class, () -> 
             Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().minusDays(1), false));
+    }
+
+    @Test
+    @DisplayName("Should allow instantiation with past date (for rehydration from DB)")
+    void shouldAllowInstantiationWithPastDate() {
+        LocalDate pastDate = LocalDate.now().minusDays(1);
+        Coupon coupon = new Coupon(
+            UUID.randomUUID(),
+            "ABC123",
+            "Desc",
+            new BigDecimal("10.0"),
+            pastDate,
+            true,
+            LocalDateTime.now().minusDays(1),
+            null
+        );
+        
+        assertEquals(pastDate, coupon.expirationDate());
     }
 
     @Test
