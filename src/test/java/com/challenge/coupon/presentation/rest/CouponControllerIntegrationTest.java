@@ -184,4 +184,22 @@ class CouponControllerIntegrationTest {
                 .andExpect(status().isConflict()) // Should be 409
                 .andExpect(jsonPath("$.message", is("Coupon has already been deleted")));
     }
+
+    @Test
+    @DisplayName("400 when UUID is malformed in path variable")
+    void shouldReturn400WhenUuidIsMalformed() throws Exception {
+        mockMvc.perform(delete("/api/v1/coupons/not-a-uuid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)));
+    }
+
+    @Test
+    @DisplayName("400 when JSON is malformed")
+    void shouldReturn400WhenJsonIsMalformed() throws Exception {
+        mockMvc.perform(post("/api/v1/coupons")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"code\": \"ABC123\", \"invalid\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status", is(400)));
+    }
 }

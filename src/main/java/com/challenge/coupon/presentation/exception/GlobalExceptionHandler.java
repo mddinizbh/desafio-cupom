@@ -5,9 +5,11 @@ import com.challenge.coupon.domain.exception.CouponNotFoundException;
 import com.challenge.coupon.domain.exception.InvalidCouponException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 
@@ -32,6 +34,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         return createResponse(HttpStatus.BAD_REQUEST, "Bad Request", "Validation failed");
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        return createResponse(HttpStatus.BAD_REQUEST, "Bad Request", "Malformed JSON request or invalid field format");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String message = String.format("Parameter '%s' has an invalid value", ex.getName());
+        return createResponse(HttpStatus.BAD_REQUEST, "Bad Request", message);
     }
 
     @ExceptionHandler(Exception.class)
