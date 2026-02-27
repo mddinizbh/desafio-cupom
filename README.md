@@ -16,13 +16,20 @@ API REST para o gerenciamento de cupons de desconto. O projeto segue os princíp
 - **MapStruct**
 
 ## Arquitetura
-O projeto segue a **Arquitetura Hexagonal (Ports & Adapters)**, com foco em imutabilidade no núcleo através do uso de **Java Records**:
+O projeto segue a **Arquitetura Hexagonal (Ports & Adapters)**, onde a regra de dependência sempre aponta para o centro (Domínio), garantindo total desacoplamento da infraestrutura:
 
 ```text
-  [Apresentação (REST)]  ---> [Aplicação (Use Case)]
-                                     |
-                                     v
-  [Infraestrutura (JPA)] <--- [Aplicação (Port Out)] <--- [Domínio (Model Record)]
+      [ADAPTERS ENTRADA]            [NÚCLEO (APPLICATION)]            [ADAPTERS SAÍDA]
+    (Presentation/REST)             (Use Cases & Ports)             (Infrastructure/JPA)
+             |                               |                               |
+             |       (Depende de)            |           (Implementa)        |
+             +----------------------------> [ ] <----------------------------+
+                                             |
+                                     (Portas de Entrada)
+                                             |
+                                             v
+                                    [ DOMÍNIO (RECORDS) ]
+                                     (Regras de Negócio)
 ```
 
 ### Estrutura de Pacotes:
