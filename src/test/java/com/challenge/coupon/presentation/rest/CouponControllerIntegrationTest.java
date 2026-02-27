@@ -92,8 +92,8 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("422 ao informar discountValue abaixo de 0.5")
-    void shouldReturn422WhenDiscountTooLow() throws Exception {
+    @DisplayName("201 ao informar discountValue abaixo de 0.5 (aplica valor padrão de 0.5)")
+    void shouldReturn201WhenDiscountTooLowAndApplyDefault() throws Exception {
         Map<String, Object> request = new HashMap<>();
         request.put("code", "ABC123");
         request.put("description", "Desc");
@@ -103,7 +103,8 @@ class CouponControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.discountValue", is(0.5)));
     }
 
     @Test

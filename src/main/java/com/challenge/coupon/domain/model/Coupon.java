@@ -26,7 +26,7 @@ public record Coupon(
         }
 
         if (discountValue.compareTo(new BigDecimal("0.5")) < 0) {
-            throw new InvalidCouponException("O valor de desconto mínimo é 0.5.");
+            discountValue = new BigDecimal("0.5");
         }
 
         if (expirationDate.isBefore(LocalDate.now())) {

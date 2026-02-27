@@ -50,10 +50,10 @@ class CouponTest {
     }
 
     @Test
-    @DisplayName("Deve lançar InvalidCouponException quando discountValue for menor que 0.5")
-    void shouldThrowExceptionWhenDiscountValueIsTooLow() {
-        assertThrows(InvalidCouponException.class, () -> 
-            Coupon.create("ABC123", "Desc", new BigDecimal("0.4"), LocalDate.now().plusDays(1), false));
+    @DisplayName("Deve usar valor padrão de 0.5 quando discountValue for menor que 0.5")
+    void shouldApplyDefaultDiscountValueWhenTooLow() {
+        Coupon coupon = Coupon.create("ABC123", "Desc", new BigDecimal("0.4"), LocalDate.now().plusDays(1), false);
+        assertEquals(new BigDecimal("0.5"), coupon.discountValue());
     }
 
     @Test
