@@ -31,7 +31,7 @@ class DeleteCouponUseCaseTest {
     private DeleteCouponUseCase deleteCouponUseCase;
 
     @Test
-    @DisplayName("Deve realizar soft delete quando cupom existir e não estiver deletado")
+    @DisplayName("Should perform soft delete when coupon exists and is not deleted")
     void shouldPerformSoftDeleteWhenCouponExistsAndActive() {
         UUID id = UUID.randomUUID();
         Coupon coupon = new Coupon(id, "ABC123", "Desc", new BigDecimal("10.0"), 
@@ -47,7 +47,7 @@ class DeleteCouponUseCaseTest {
     }
 
     @Test
-    @DisplayName("Deve lançar CouponNotFoundException quando cupom não existir")
+    @DisplayName("Should throw CouponNotFoundException when coupon does not exist")
     void shouldThrowExceptionWhenCouponNotFound() {
         UUID id = UUID.randomUUID();
         when(repositoryPort.findById(id)).thenReturn(Optional.empty());
@@ -57,7 +57,7 @@ class DeleteCouponUseCaseTest {
     }
 
     @Test
-    @DisplayName("Deve lançar CouponAlreadyDeletedException quando cupom já estiver deletado")
+    @DisplayName("Should throw CouponAlreadyDeletedException when coupon is already deleted")
     void shouldThrowExceptionWhenCouponAlreadyDeleted() {
         UUID id = UUID.randomUUID();
         Coupon coupon = new Coupon(id, "ABC123", "Desc", new BigDecimal("10.0"), 

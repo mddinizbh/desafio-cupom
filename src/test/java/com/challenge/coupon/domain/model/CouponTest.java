@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CouponTest {
 
     @Test
-    @DisplayName("Deve criar cupom com dados válidos")
+    @DisplayName("Should create coupon with valid data")
     void shouldCreateCouponWithValidData() {
         String code = "ABC123";
         String description = "Test Coupon";
@@ -34,7 +34,7 @@ class CouponTest {
     }
 
     @Test
-    @DisplayName("Deve sanitizar código removendo caracteres especiais")
+    @DisplayName("Should sanitize code removing special characters")
     void shouldSanitizeCodeRemovingSpecialCharacters() {
         String codeWithSpecials = "A#B$C%1&2*3";
         Coupon coupon = Coupon.create(codeWithSpecials, "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false);
@@ -42,7 +42,7 @@ class CouponTest {
     }
 
     @Test
-    @DisplayName("Deve lançar InvalidCouponException quando código após sanitização tiver menos de 6 chars")
+    @DisplayName("Should throw InvalidCouponException when sanitized code length is invalid")
     void shouldThrowExceptionWhenSanitizedCodeLengthIsInvalid() {
         String shortCode = "A#B$C%1"; // ABC1 -> 4 chars
         assertThrows(InvalidCouponException.class, () -> 
@@ -50,28 +50,28 @@ class CouponTest {
     }
 
     @Test
-    @DisplayName("Deve usar valor padrão de 0.5 quando discountValue for menor que 0.5")
+    @DisplayName("Should apply default discount value of 0.5 when discountValue is less than 0.5")
     void shouldApplyDefaultDiscountValueWhenTooLow() {
         Coupon coupon = Coupon.create("ABC123", "Desc", new BigDecimal("0.4"), LocalDate.now().plusDays(1), false);
         assertEquals(new BigDecimal("0.5"), coupon.discountValue());
     }
 
     @Test
-    @DisplayName("Deve lançar InvalidCouponException quando expirationDate for no passado")
+    @DisplayName("Should throw InvalidCouponException when expirationDate is in the past")
     void shouldThrowExceptionWhenExpirationDateIsInPast() {
         assertThrows(InvalidCouponException.class, () -> 
             Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().minusDays(1), false));
     }
 
     @Test
-    @DisplayName("Deve criar cupom já publicado quando published=true")
+    @DisplayName("Should create published coupon when published is true")
     void shouldCreatePublishedCoupon() {
         Coupon coupon = Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), true);
         assertTrue(coupon.published());
     }
 
     @Test
-    @DisplayName("Deve realizar soft delete corretamente (retornando nova instância com deletedAt não nulo)")
+    @DisplayName("Should perform soft delete correctly (returning new instance with non-null deletedAt)")
     void shouldPerformSoftDeleteCorrectly() {
         Coupon coupon = Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false);
         Coupon deletedCoupon = coupon.delete();
@@ -83,7 +83,7 @@ class CouponTest {
     }
 
     @Test
-    @DisplayName("Deve lançar CouponAlreadyDeletedException ao tentar deletar cupom já deletado")
+    @DisplayName("Should throw CouponAlreadyDeletedException when trying to delete an already deleted coupon")
     void shouldThrowExceptionWhenDeletingAlreadyDeletedCoupon() {
         Coupon coupon = Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false);
         Coupon deletedCoupon = coupon.delete();
@@ -91,14 +91,14 @@ class CouponTest {
     }
 
     @Test
-    @DisplayName("isDeleted() deve retornar false para cupom ativo")
+    @DisplayName("isDeleted() should return false for active coupon")
     void isDeletedShouldReturnFalseForActiveCoupon() {
         Coupon coupon = Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false);
         assertFalse(coupon.isDeleted());
     }
 
     @Test
-    @DisplayName("isDeleted() deve retornar true para cupom deletado")
+    @DisplayName("isDeleted() should return true for deleted coupon")
     void isDeletedShouldReturnTrueForDeletedCoupon() {
         Coupon coupon = Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false);
         Coupon deletedCoupon = coupon.delete();

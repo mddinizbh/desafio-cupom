@@ -22,7 +22,7 @@ public record Coupon(
         validateMandatoryFields(code, description, discountValue, expirationDate);
         code = sanitizeCode(code);
         if (code.length() != 6) {
-            throw new InvalidCouponException("O código do cupom deve ter exatamente 6 caracteres após a sanitização.");
+            throw new InvalidCouponException("Coupon code must have exactly 6 characters after sanitization.");
         }
 
         if (discountValue.compareTo(new BigDecimal("0.5")) < 0) {
@@ -30,7 +30,7 @@ public record Coupon(
         }
 
         if (expirationDate.isBefore(LocalDate.now())) {
-            throw new InvalidCouponException("A data de expiração não pode estar no passado.");
+            throw new InvalidCouponException("Expiration date cannot be in the past.");
         }
     }
 
@@ -78,7 +78,7 @@ public record Coupon(
         if (code == null || code.isBlank() ||
             description == null || description.isBlank() ||
             discountValue == null || expirationDate == null) {
-            throw new InvalidCouponException("Campos obrigatórios ausentes.");
+            throw new InvalidCouponException("Missing mandatory fields.");
         }
     }
 }

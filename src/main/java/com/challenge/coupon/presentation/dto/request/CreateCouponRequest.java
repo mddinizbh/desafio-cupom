@@ -7,16 +7,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record CreateCouponRequest(
-    @NotBlank(message = "O código é obrigatório")
+    @NotBlank(message = "Code is mandatory")
     String code,
     
-    @NotBlank(message = "A descrição é obrigatória")
+    @NotBlank(message = "Description is mandatory")
     String description,
     
-    @NotNull(message = "O valor de desconto é obrigatório")
+    @NotNull(message = "Discount value is mandatory")
     BigDecimal discountValue,
     
-    @NotNull(message = "A data de expiração é obrigatória")
+    @NotNull(message = "Expiration date is mandatory")
     LocalDate expirationDate,
     
     boolean published

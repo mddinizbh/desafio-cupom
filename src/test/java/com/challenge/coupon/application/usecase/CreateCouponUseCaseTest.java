@@ -27,7 +27,7 @@ class CreateCouponUseCaseTest {
     private CreateCouponUseCase createCouponUseCase;
 
     @Test
-    @DisplayName("Deve salvar e retornar cupom ao criar com dados válidos")
+    @DisplayName("Should save and return coupon when creating with valid data")
     void shouldSaveAndReturnCouponWhenDataIsValid() {
         String code = "ABC123";
         String description = "Desc";
@@ -45,7 +45,7 @@ class CreateCouponUseCaseTest {
     }
 
     @Test
-    @DisplayName("Deve propagar exceção quando domínio lançar InvalidCouponException")
+    @DisplayName("Should propagate exception when domain throws InvalidCouponException")
     void shouldPropagateExceptionWhenDomainFails() {
         String invalidCode = "123";
         assertThrows(InvalidCouponException.class, () -> 

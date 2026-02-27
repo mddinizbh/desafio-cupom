@@ -20,7 +20,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/coupons")
 @RequiredArgsConstructor
-@Tag(name = "Coupons", description = "API de gerenciamento de cupons de desconto")
+@Tag(name = "Coupons", description = "Coupon Management API")
 public class CouponController {
 
     private final CreateCouponUseCase createCouponUseCase;
@@ -28,10 +28,10 @@ public class CouponController {
     private final CouponWebMapper mapper;
 
     @PostMapping
-    @Operation(summary = "Cria um novo cupom")
-    @ApiResponse(responseCode = "201", description = "Cupom criado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Dados inválidos (Bad Request)")
-    @ApiResponse(responseCode = "422", description = "Violação de regra de negócio")
+    @Operation(summary = "Creates a new coupon")
+    @ApiResponse(responseCode = "201", description = "Coupon created successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid data (Bad Request)")
+    @ApiResponse(responseCode = "422", description = "Business rule violation")
     public ResponseEntity<CouponResponse> create(@Valid @RequestBody CreateCouponRequest request) {
         Coupon coupon = createCouponUseCase.create(
                 request.code(),
@@ -44,10 +44,10 @@ public class CouponController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Exclui um cupom (Soft Delete)")
-    @ApiResponse(responseCode = "204", description = "Cupom excluído com sucesso")
-    @ApiResponse(responseCode = "404", description = "Cupom não encontrado")
-    @ApiResponse(responseCode = "409", description = "Cupom já excluído")
+    @Operation(summary = "Deletes a coupon (Soft Delete)")
+    @ApiResponse(responseCode = "204", description = "Coupon deleted successfully")
+    @ApiResponse(responseCode = "404", description = "Coupon not found")
+    @ApiResponse(responseCode = "409", description = "Coupon already deleted")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         deleteCouponUseCase.delete(id);
         return ResponseEntity.noContent().build();

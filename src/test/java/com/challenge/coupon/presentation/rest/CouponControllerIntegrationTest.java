@@ -45,7 +45,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("201 ao criar cupom válido")
+    @DisplayName("201 when creating valid coupon")
     void shouldCreateValidCoupon() throws Exception {
         Map<String, Object> request = new HashMap<>();
         request.put("code", "ABC123");
@@ -62,7 +62,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("201 ao criar cupom com caracteres especiais no código (verifica sanitização na resposta)")
+    @DisplayName("201 when creating coupon with special characters (verify sanitization in response)")
     void shouldCreateCouponWithSpecialCharsInCode() throws Exception {
         Map<String, Object> request = new HashMap<>();
         request.put("code", "A#B$C%1&2*3");
@@ -79,7 +79,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("400 ao omitir campo obrigatório")
+    @DisplayName("400 when missing mandatory field")
     void shouldReturn400WhenFieldMissing() throws Exception {
         Map<String, Object> request = new HashMap<>();
         request.put("description", "Desc");
@@ -92,7 +92,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("201 ao informar discountValue abaixo de 0.5 (aplica valor padrão de 0.5)")
+    @DisplayName("201 when discountValue is below 0.5 (applies default 0.5)")
     void shouldReturn201WhenDiscountTooLowAndApplyDefault() throws Exception {
         Map<String, Object> request = new HashMap<>();
         request.put("code", "ABC123");
@@ -108,7 +108,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("422 ao informar expirationDate no passado")
+    @DisplayName("422 when expirationDate is in the past")
     void shouldReturn422WhenExpirationInPast() throws Exception {
         Map<String, Object> request = new HashMap<>();
         request.put("code", "ABC123");
@@ -123,7 +123,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("422 ao código resultar em menos de 6 chars após sanitização")
+    @DisplayName("422 when code results in less than 6 chars after sanitization")
     void shouldReturn422WhenSanitizedCodeTooShort() throws Exception {
         Map<String, Object> request = new HashMap<>();
         request.put("code", "A#B$C%1"); // ABC1
@@ -138,7 +138,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("204 ao deletar cupom existente")
+    @DisplayName("204 when deleting existing coupon")
     void shouldDeleteExistingCoupon() throws Exception {
         CouponEntity entity = CouponEntity.builder()
                 .code("ABC123")
@@ -159,14 +159,14 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("404 ao tentar deletar cupom inexistente")
+    @DisplayName("404 when trying to delete inexistent coupon")
     void shouldReturn404WhenDeletingInexistent() throws Exception {
         mockMvc.perform(delete("/api/v1/coupons/" + UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @DisplayName("409 ao tentar deletar cupom já deletado")
+    @DisplayName("409 when trying to delete already deleted coupon")
     void shouldReturn409WhenAlreadyDeleted() throws Exception {
         CouponEntity entity = CouponEntity.builder()
                 .code("ABC123")
