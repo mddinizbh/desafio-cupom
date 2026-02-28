@@ -1,7 +1,6 @@
 package com.challenge.coupon.domain.model;
 
 import com.challenge.coupon.domain.exception.CouponAlreadyDeletedException;
-import com.challenge.coupon.domain.exception.InvalidCouponException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,13 +18,10 @@ public record Coupon(
     LocalDateTime deletedAt
 ) {
     public Coupon {
-        validateMandatoryFields(code, description, discountValue, expirationDate);
-        code = sanitizeCode(code);
-        if (code.length() != 6) {
-            throw new InvalidCouponException("Coupon code must have exactly 6 characters after sanitization.");
+        if (code != null) {
+            code = code.toUpperCase();
         }
-
-        if (discountValue.compareTo(new BigDecimal("0.5")) < 0) {
+        if (discountValue != null && discountValue.compareTo(new BigDecimal("0.5")) < 0) {
             discountValue = new BigDecimal("0.5");
         }
     }
@@ -33,9 +29,6 @@ public record Coupon(
     public static Coupon create(String code, String description,
                                 BigDecimal discountValue, LocalDate expirationDate,
                                 boolean published) {
-        if (expirationDate != null && expirationDate.isBefore(LocalDate.now())) {
-            throw new InvalidCouponException("Expiration date cannot be in the past.");
-        }
         return new Coupon(
             null,
             code,
@@ -66,18 +59,5 @@ public record Coupon(
 
     public boolean isDeleted() {
         return deletedAt != null;
-    }
-
-    private static String sanitizeCode(String code) {
-        if (code == null) return "";
-        return code.replaceAll("[^a-zA-Z0-9]", "");
-    }
-
-    private static void validateMandatoryFields(String code, String description, BigDecimal discountValue, LocalDate expirationDate) {
-        if (code == null || code.isBlank() ||
-            description == null || description.isBlank() ||
-            discountValue == null || expirationDate == null) {
-            throw new InvalidCouponException("Missing mandatory fields.");
-        }
     }
 }
