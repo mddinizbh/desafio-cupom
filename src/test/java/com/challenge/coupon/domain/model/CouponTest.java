@@ -1,7 +1,6 @@
 package com.challenge.coupon.domain.model;
 
 import com.challenge.coupon.domain.exception.CouponAlreadyDeletedException;
-import com.challenge.coupon.domain.exception.InvalidCouponException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -36,33 +35,10 @@ class CouponTest {
     }
 
     @Test
-    @DisplayName("Should sanitize code removing special characters")
-    void shouldSanitizeCodeRemovingSpecialCharacters() {
-        String codeWithSpecials = "A#B$C%1&2*3";
-        Coupon coupon = Coupon.create(codeWithSpecials, "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false);
-        assertEquals("ABC123", coupon.code());
-    }
-
-    @Test
-    @DisplayName("Should throw InvalidCouponException when sanitized code length is invalid")
-    void shouldThrowExceptionWhenSanitizedCodeLengthIsInvalid() {
-        String shortCode = "A#B$C%1"; // ABC1 -> 4 chars
-        assertThrows(InvalidCouponException.class, () -> 
-            Coupon.create(shortCode, "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false));
-    }
-
-    @Test
     @DisplayName("Should apply default discount value of 0.5 when discountValue is less than 0.5")
     void shouldApplyDefaultDiscountValueWhenTooLow() {
         Coupon coupon = Coupon.create("ABC123", "Desc", new BigDecimal("0.4"), LocalDate.now().plusDays(1), false);
         assertEquals(new BigDecimal("0.5"), coupon.discountValue());
-    }
-
-    @Test
-    @DisplayName("Should throw InvalidCouponException when expirationDate is in the past on creation")
-    void shouldThrowExceptionWhenExpirationDateIsInPastOnCreation() {
-        assertThrows(InvalidCouponException.class, () -> 
-            Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().minusDays(1), false));
     }
 
     @Test

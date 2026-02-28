@@ -62,8 +62,8 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("201 when creating coupon with special characters (verify sanitization in response)")
-    void shouldCreateCouponWithSpecialCharsInCode() throws Exception {
+    @DisplayName("400 when creating coupon with special characters (no longer supported/sanitized)")
+    void shouldReturn400WhenSpecialCharsInCode() throws Exception {
         Map<String, Object> request = new HashMap<>();
         request.put("code", "A#B$C%1&2*3");
         request.put("description", "Desc");
@@ -74,8 +74,9 @@ class CouponControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.code", is("ABC123")));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail", is("One or more fields have invalid values")))
+                .andExpect(jsonPath("$.errors[0].field", is("code")));
     }
 
     @Test
@@ -88,7 +89,7 @@ class CouponControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", is("Validation failed")));
+                .andExpect(jsonPath("$.detail", is("One or more fields have invalid values")));
     }
 
     @Test
@@ -108,8 +109,8 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("422 when expirationDate is in the past")
-    void shouldReturn422WhenExpirationInPast() throws Exception {
+    @DisplayName("400 when expirationDate is in the past")
+    void shouldReturn400WhenExpirationInPast() throws Exception {
         Map<String, Object> request = new HashMap<>();
         request.put("code", "ABC123");
         request.put("description", "Desc");
@@ -119,14 +120,15 @@ class CouponControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail", is("One or more fields have invalid values")));
     }
 
     @Test
-    @DisplayName("422 when code results in less than 6 chars after sanitization")
-    void shouldReturn422WhenSanitizedCodeTooShort() throws Exception {
+    @DisplayName("400 when code has invalid format (length or characters)")
+    void shouldReturn400WhenCodeInvalidFormat() throws Exception {
         Map<String, Object> request = new HashMap<>();
-        request.put("code", "A#B$C%1"); // ABC1
+        request.put("code", "ABC1"); // Too short
         request.put("description", "Desc");
         request.put("discountValue", 10.0);
         request.put("expirationDate", LocalDate.now().plusDays(10).toString());
@@ -134,7 +136,8 @@ class CouponControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail", is("One or more fields have invalid values")));
     }
 
     @Test
@@ -182,7 +185,7 @@ class CouponControllerIntegrationTest {
 
         mockMvc.perform(delete("/api/v1/coupons/" + saved.getId()))
                 .andExpect(status().isConflict()) // Should be 409
-                .andExpect(jsonPath("$.message", is("Coupon has already been deleted")));
+                .andExpect(jsonPath("$.detail", is("Coupon has already been deleted")));
     }
 
     @Test

@@ -1,7 +1,6 @@
 package com.challenge.coupon.application.usecase;
 
 import com.challenge.coupon.application.port.out.CouponRepositoryPort;
-import com.challenge.coupon.domain.exception.InvalidCouponException;
 import com.challenge.coupon.domain.model.Coupon;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,15 +41,5 @@ class CreateCouponUseCaseTest {
         assertNotNull(result);
         assertEquals("ABC123", result.code());
         verify(repositoryPort, times(1)).save(any(Coupon.class));
-    }
-
-    @Test
-    @DisplayName("Should propagate exception when domain throws InvalidCouponException")
-    void shouldPropagateExceptionWhenDomainFails() {
-        String invalidCode = "123";
-        assertThrows(InvalidCouponException.class, () -> 
-            createCouponUseCase.create(invalidCode, "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false));
-        
-        verify(repositoryPort, never()).save(any(Coupon.class));
     }
 }

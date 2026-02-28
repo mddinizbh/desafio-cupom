@@ -3,69 +3,116 @@ package com.challenge.coupon.presentation.exception;
 import com.challenge.coupon.domain.exception.CouponAlreadyDeletedException;
 import com.challenge.coupon.domain.exception.CouponNotFoundException;
 import com.challenge.coupon.domain.exception.InvalidCouponException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.time.LocalDateTime;
+import java.net.URI;
+import java.util.List;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
+    private static final String ERRORS_PROPERTY = "errors";
+    private static final String TRACE_ID_PROPERTY = "traceId";
+    private static final String PROBLEM_TYPE_PREFIX = "https://yourdomain.com/problems/";
+
+    private final HttpServletRequest request;
+
     @ExceptionHandler(InvalidCouponException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidCoupon(InvalidCouponException ex) {
-        return createResponse(HttpStatus.UNPROCESSABLE_ENTITY, "Unprocessable Entity", ex.getMessage());
+    public ProblemDetail handleInvalidCoupon(InvalidCouponException ex) {
+        return createProblemDetail(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "Business Rule Violation",
+                ex.getMessage(),
+                "invalid-coupon"
+        );
     }
 
     @ExceptionHandler(CouponNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(CouponNotFoundException ex) {
-        return createResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage());
+    public ProblemDetail handleNotFound(CouponNotFoundException ex) {
+        return createProblemDetail(
+                HttpStatus.NOT_FOUND,
+                "Resource Not Found",
+                ex.getMessage(),
+                "coupon-not-found"
+        );
     }
 
     @ExceptionHandler(CouponAlreadyDeletedException.class)
-    public ResponseEntity<ErrorResponse> handleAlreadyDeleted(CouponAlreadyDeletedException ex) {
-        return createResponse(HttpStatus.CONFLICT, "Conflict", ex.getMessage());
+    public ProblemDetail handleAlreadyDeleted(CouponAlreadyDeletedException ex) {
+        return createProblemDetail(
+                HttpStatus.CONFLICT,
+                "Conflict",
+                ex.getMessage(),
+                "coupon-already-deleted"
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
-        return createResponse(HttpStatus.BAD_REQUEST, "Bad Request", "Validation failed");
+    public ProblemDetail handleValidation(MethodArgumentNotValidException ex) {
+        var errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> java.util.Map.of(
+                        "field", error.getField(),
+                        "message", error.getDefaultMessage() != null ? error.getDefaultMessage() : "Invalid value"
+                ))
+                .toList();
+
+        ProblemDetail problemDetail = createProblemDetail(
+                HttpStatus.BAD_REQUEST,
+                "Validation Failed",
+                "One or more fields have invalid values",
+                "validation-error"
+        );
+        problemDetail.setProperty(ERRORS_PROPERTY, errors);
+        return problemDetail;
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleMessageNotReadable(HttpMessageNotReadableException ex) {
-        return createResponse(HttpStatus.BAD_REQUEST, "Bad Request", "Malformed JSON request or invalid field format");
+    public ProblemDetail handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        return createProblemDetail(
+                HttpStatus.BAD_REQUEST,
+                "Malformed JSON",
+                "Malformed JSON request or invalid field format",
+                "malformed-json"
+        );
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        String message = String.format("Parameter '%s' has an invalid value", ex.getName());
-        return createResponse(HttpStatus.BAD_REQUEST, "Bad Request", message);
+    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String detail = String.format("Parameter '%s' has an invalid value", ex.getName());
+        return createProblemDetail(
+                HttpStatus.BAD_REQUEST,
+                "Invalid Parameter Type",
+                detail,
+                "invalid-parameter-type"
+        );
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
-        return createResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", ex.getMessage());
-    }
-
-    private ResponseEntity<ErrorResponse> createResponse(HttpStatus status, String error, String message) {
-        ErrorResponse response = new ErrorResponse(
-                status.value(),
-                error,
-                message,
-                LocalDateTime.now()
+    public ProblemDetail handleGeneric(Exception ex) {
+        return createProblemDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Internal Server Error",
+                "An unexpected error occurred. Please try again later.",
+                "internal-server-error"
         );
-        return ResponseEntity.status(status).body(response);
     }
 
-    public record ErrorResponse(
-            int status,
-            String error,
-            String message,
-            LocalDateTime timestamp
-    ) {}
+    private ProblemDetail createProblemDetail(HttpStatus status, String title, String detail, String typeSuffix) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+        problemDetail.setTitle(title);
+        problemDetail.setType(URI.create(PROBLEM_TYPE_PREFIX + typeSuffix));
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+
+        return problemDetail;
+    }
+
 }
