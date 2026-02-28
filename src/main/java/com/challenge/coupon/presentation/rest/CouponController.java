@@ -2,6 +2,7 @@ package com.challenge.coupon.presentation.rest;
 
 import com.challenge.coupon.application.usecase.CreateCouponUseCase;
 import com.challenge.coupon.application.usecase.DeleteCouponUseCase;
+import com.challenge.coupon.application.usecase.GetCouponByIdUseCase;
 import com.challenge.coupon.domain.model.Coupon;
 import com.challenge.coupon.presentation.dto.request.CreateCouponRequest;
 import com.challenge.coupon.presentation.dto.response.CouponResponse;
@@ -25,6 +26,7 @@ public class CouponController {
 
     private final CreateCouponUseCase createCouponUseCase;
     private final DeleteCouponUseCase deleteCouponUseCase;
+    private final GetCouponByIdUseCase getCouponByIdUseCase;
     private final CouponWebMapper mapper;
 
     @PostMapping
@@ -41,6 +43,15 @@ public class CouponController {
                 request.published()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(coupon));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Gets a coupon by ID")
+    @ApiResponse(responseCode = "200", description = "Coupon found")
+    @ApiResponse(responseCode = "404", description = "Coupon not found")
+    public ResponseEntity<CouponResponse> getById(@PathVariable UUID id) {
+        Coupon coupon = getCouponByIdUseCase.execute(id);
+        return ResponseEntity.ok(mapper.toResponse(coupon));
     }
 
     @DeleteMapping("/{id}")

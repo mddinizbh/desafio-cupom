@@ -60,4 +60,15 @@ public record Coupon(
     public boolean isDeleted() {
         return deletedAt != null;
     }
+
+    public CouponStatus getStatus() {
+        if (isDeleted()) {
+            return CouponStatus.DELETED;
+        }
+        return published ? CouponStatus.ACTIVE : CouponStatus.INACTIVE;
+    }
+
+    public boolean isRedeemed() {
+        return isDeleted() && published;
+    }
 }

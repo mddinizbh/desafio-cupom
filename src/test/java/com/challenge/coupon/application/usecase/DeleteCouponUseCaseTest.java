@@ -37,12 +37,12 @@ class DeleteCouponUseCaseTest {
         Coupon coupon = new Coupon(id, "ABC123", "Desc", new BigDecimal("10.0"), 
                 LocalDate.now().plusDays(1), false, LocalDateTime.now(), null);
 
-        when(repositoryPort.findByIdIncludingDeleted(id)).thenReturn(Optional.of(coupon));
+        when(repositoryPort.findById(id)).thenReturn(Optional.of(coupon));
         when(repositoryPort.save(any(Coupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         deleteCouponUseCase.delete(id);
 
-        verify(repositoryPort, times(1)).findByIdIncludingDeleted(id);
+        verify(repositoryPort, times(1)).findById(id);
         verify(repositoryPort, times(1)).save(argThat(Coupon::isDeleted));
     }
 
@@ -50,7 +50,7 @@ class DeleteCouponUseCaseTest {
     @DisplayName("Should throw CouponNotFoundException when coupon does not exist")
     void shouldThrowExceptionWhenCouponNotFound() {
         UUID id = UUID.randomUUID();
-        when(repositoryPort.findByIdIncludingDeleted(id)).thenReturn(Optional.empty());
+        when(repositoryPort.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(CouponNotFoundException.class, () -> deleteCouponUseCase.delete(id));
         verify(repositoryPort, never()).save(any());
@@ -63,7 +63,7 @@ class DeleteCouponUseCaseTest {
         Coupon coupon = new Coupon(id, "ABC123", "Desc", new BigDecimal("10.0"), 
                 LocalDate.now().plusDays(1), false, LocalDateTime.now(), LocalDateTime.now());
 
-        when(repositoryPort.findByIdIncludingDeleted(id)).thenReturn(Optional.of(coupon));
+        when(repositoryPort.findById(id)).thenReturn(Optional.of(coupon));
 
         assertThrows(CouponAlreadyDeletedException.class, () -> deleteCouponUseCase.delete(id));
         verify(repositoryPort, never()).save(any());

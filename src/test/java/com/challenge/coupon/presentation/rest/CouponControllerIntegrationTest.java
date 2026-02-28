@@ -21,8 +21,8 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -141,6 +141,55 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("200 when getting existing coupon by ID")
+    void shouldGetExistingCouponById() throws Exception {
+        CouponEntity entity = CouponEntity.builder()
+                .code("ABC123")
+                .description("Test Description")
+                .discountValue(new BigDecimal("10.00"))
+                .expirationDate(LocalDate.now().plusDays(5))
+                .createdAt(LocalDateTime.now())
+                .published(true)
+                .build();
+        CouponEntity saved = repository.save(entity);
+
+        mockMvc.perform(get("/api/v1/coupons/" + saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(saved.getId().toString())))
+                .andExpect(jsonPath("$.code", is("ABC123")))
+                .andExpect(jsonPath("$.status", is("ACTIVE")))
+                .andExpect(jsonPath("$.published", is(true)))
+                .andExpect(jsonPath("$.redeemed", is(false)));
+    }
+
+    @Test
+    @DisplayName("200 when getting deleted coupon by ID")
+    void shouldGetDeletedCouponById() throws Exception {
+        CouponEntity entity = CouponEntity.builder()
+                .code("DEL123")
+                .description("Deleted Description")
+                .discountValue(new BigDecimal("15.00"))
+                .expirationDate(LocalDate.now().plusDays(5))
+                .createdAt(LocalDateTime.now())
+                .deletedAt(LocalDateTime.now())
+                .published(true)
+                .build();
+        CouponEntity saved = repository.save(entity);
+
+        mockMvc.perform(get("/api/v1/coupons/" + saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", is("DELETED")))
+                .andExpect(jsonPath("$.redeemed", is(true)));
+    }
+
+    @Test
+    @DisplayName("404 when getting inexistent coupon")
+    void shouldReturn404WhenGettingInexistent() throws Exception {
+        mockMvc.perform(get("/api/v1/coupons/" + UUID.randomUUID()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("204 when deleting existing coupon")
     void shouldDeleteExistingCoupon() throws Exception {
         CouponEntity entity = CouponEntity.builder()
@@ -156,9 +205,9 @@ class CouponControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/coupons/" + saved.getId()))
                 .andExpect(status().isNoContent());
 
-        // Verifica soft delete no banco (usando native query ou ignorando @Where para teste se necessário, 
-        // mas aqui basta ver que o repo padrão não o encontra mais)
-        assertFalse(repository.findById(saved.getId()).isPresent());
+        // Verifica soft delete no banco (agora deve estar presente mas com deletedAt preenchido)
+        assertTrue(repository.findById(saved.getId()).isPresent());
+        assertTrue(repository.findById(saved.getId()).get().getDeletedAt() != null);
     }
 
     @Test

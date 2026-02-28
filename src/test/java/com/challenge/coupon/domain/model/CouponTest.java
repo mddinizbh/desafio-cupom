@@ -100,4 +100,31 @@ class CouponTest {
         Coupon deletedCoupon = coupon.delete();
         assertTrue(deletedCoupon.isDeleted());
     }
+
+    @Test
+    @DisplayName("Should return correct status")
+    void shouldReturnCorrectStatus() {
+        Coupon active = Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), true);
+        Coupon inactive = Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false);
+        Coupon deleted = active.delete();
+
+        assertEquals(CouponStatus.ACTIVE, active.getStatus());
+        assertEquals(CouponStatus.INACTIVE, inactive.getStatus());
+        assertEquals(CouponStatus.DELETED, deleted.getStatus());
+    }
+
+    @Test
+    @DisplayName("Should return correct redeemed value")
+    void shouldReturnCorrectRedeemedValue() {
+        Coupon active = Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), true);
+        Coupon inactive = Coupon.create("ABC123", "Desc", new BigDecimal("10.0"), LocalDate.now().plusDays(1), false);
+        
+        Coupon deletedActive = active.delete();
+        Coupon deletedInactive = inactive.delete();
+
+        assertFalse(active.isRedeemed(), "Active non-deleted should not be redeemed");
+        assertFalse(inactive.isRedeemed(), "Inactive non-deleted should not be redeemed");
+        assertTrue(deletedActive.isRedeemed(), "Deleted active coupon should be redeemed");
+        assertFalse(deletedInactive.isRedeemed(), "Deleted inactive coupon should NOT be redeemed");
+    }
 }

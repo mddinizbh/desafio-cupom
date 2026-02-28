@@ -10,15 +10,12 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class DeleteCouponUseCase {
+public class GetCouponByIdUseCase {
 
-    private final CouponRepositoryPort couponRepositoryPort;
+    private final CouponRepositoryPort repositoryPort;
 
-    public void delete(UUID id) {
-        Coupon coupon = couponRepositoryPort.findById(id)
+    public Coupon execute(UUID id) {
+        return repositoryPort.findById(id)
                 .orElseThrow(() -> new CouponNotFoundException(id));
-        
-        Coupon deletedCoupon = coupon.delete();
-        couponRepositoryPort.save(deletedCoupon);
     }
 }

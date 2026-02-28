@@ -2,7 +2,6 @@ package com.challenge.coupon.infrastructure.persistence.jpa.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Where;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,7 +15,6 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Where(clause = "deleted_at IS NULL")
 public class CouponEntity {
 
     @Id
