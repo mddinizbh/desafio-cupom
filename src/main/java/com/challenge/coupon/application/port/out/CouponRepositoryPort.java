@@ -8,6 +8,4 @@ import java.util.UUID;
 public interface CouponRepositoryPort {
     Coupon save(Coupon coupon);
     Optional<Coupon> findById(UUID id);
-
-    Optional<Coupon> findByIdIncludingDeleted(UUID id);
 }

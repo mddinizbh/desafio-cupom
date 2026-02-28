@@ -29,10 +29,4 @@ public class CouponPersistenceAdapter implements CouponRepositoryPort {
         return jpaRepository.findById(id)
                 .map(mapper::toDomain);
     }
-
-    @Override
-    public Optional<Coupon> findByIdIncludingDeleted(UUID id) {
-        return jpaRepository.findByIdIncludingDeleted(id)
-                .map(mapper::toDomain);
-    }
 }
